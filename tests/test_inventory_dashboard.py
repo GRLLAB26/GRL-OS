@@ -1,4 +1,4 @@
-from app.inventory.dashboard import InventorySummary
+from app.inventory.dashboard import InventorySummary, calculate_reorder_amount
 from app.inventory.models import Product
 
 
@@ -11,3 +11,9 @@ def test_reorder_suggestions():
     summary = InventorySummary(products)
     assert len(summary.low_stock_products) == 1
     assert summary.reorder_suggestions == [(products[0], 17)]
+
+
+def test_calculate_reorder_amount():
+    assert calculate_reorder_amount(3) == 17
+    assert calculate_reorder_amount(15) == 10
+    assert calculate_reorder_amount(20) == 10

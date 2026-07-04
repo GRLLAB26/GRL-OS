@@ -3,6 +3,10 @@ from typing import List
 from .product_repository import list_products
 
 
+def calculate_reorder_amount(quantity: int) -> int:
+    return max(10, 20 - quantity)
+
+
 class InventorySummary:
     def __init__(self, products: List):
         self.product_count = len(products)
@@ -15,7 +19,7 @@ class InventorySummary:
     def _calculate_reorder_suggestions(self):
         suggestions = []
         for p in self.low_stock_products:
-            reorder_amount = max(10, 20 - p.quantity)
+            reorder_amount = calculate_reorder_amount(p.quantity)
             suggestions.append((p, reorder_amount))
         return suggestions
 

@@ -95,9 +95,11 @@ def run_inventory_gui():
     create_btn = ctk.CTkButton(btn_frame, text="Create", width=90)
     update_btn = ctk.CTkButton(btn_frame, text="Update", width=90)
     delete_btn = ctk.CTkButton(btn_frame, text="Delete", width=90)
+    reorder_btn = ctk.CTkButton(btn_frame, text="Reorder", width=90)
     create_btn.pack(side="left", padx=3)
     update_btn.pack(side="left", padx=3)
     delete_btn.pack(side="left", padx=3)
+    reorder_btn.pack(side="left", padx=3)
 
     list_frame = ctk.CTkFrame(body_frame)
     list_frame.pack(side="right", fill="both", expand=True, pady=4)
@@ -251,6 +253,42 @@ def run_inventory_gui():
         else:
             error_label.configure(text="Product not found.")
 
+    def reorder_selected_product():
+        nonlocal selected_id
+        if selected_id is None:
+            error_label.configure(text="Select a product to reorder.")
+            return
+        product = get_product(selected_id)
+        if not product:
+            error_label.configure(text="Selected product not found.")
+            return
+        if product.quantity > 5:
+            confirm = tk_messagebox.askyesno(
+                "Reorder",
+                "This product is not low-stock. Reorder anyway?",
+            )
+            if not confirm:
+                return
+        reorder_amount = max(10, 20 - product.quantity)
+        new_quantity = product.quantity + reorder_amount
+        updated = update_product(
+            selected_id,
+            product.sku,
+            product.name,
+            product.description,
+            new_quantity,
+            product.price,
+        )
+        if updated:
+            tk_messagebox.showinfo(
+                "Reordered",
+                f"Reordered {updated.sku} by {reorder_amount} units (new quantity: {updated.quantity}).",
+            )
+            clear_form()
+            refresh_products()
+        else:
+            error_label.configure(text="Failed to reorder product.")
+
     def on_select(event):
         nonlocal selected_id
         selection = listbox.curselection()
@@ -274,6 +312,7 @@ def run_inventory_gui():
     create_btn.configure(command=on_create)
     update_btn.configure(command=on_update)
     delete_btn.configure(command=on_delete)
+    reorder_btn.configure(command=reorder_selected_product)
     listbox.bind("<<ListboxSelect>>", on_select)
 
     refresh_products()
