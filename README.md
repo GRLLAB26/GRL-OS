@@ -1,6 +1,7 @@
 # GRL-OS
 
 [![CI](https://github.com/GRLLAB26/GRL-OS/actions/workflows/python-ci.yml/badge.svg)](https://github.com/GRLLAB26/GRL-OS/actions)
+[![Coverage](https://codecov.io/gh/GRLLAB26/GRL-OS/branch/main/graph/badge.svg?token=)](https://codecov.io/gh/GRLLAB26/GRL-OS)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 GRL-OS es el repositorio base para el proyecto GRL. Contiene utilidades, una pequeña interfaz opcional con `customtkinter` y los servicios iniciales del proyecto.
@@ -53,6 +54,8 @@ O iniciar la GUI (si estás en un entorno con soporte gráfico):
 1. Crea una rama por funcionalidad: `git checkout -b feat/mi-nueva-funcionalidad`
 2. Añade pruebas y documentación mínima.
 3. Haz commit y push, luego abre un Pull Request en GitHub.
+
+Lee también: [CONTRIBUTING.md](CONTRIBUTING.md) y [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
 ## Licencia
 
