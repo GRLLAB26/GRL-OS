@@ -34,6 +34,22 @@ def run_inventory_gui():
     summary_label = ctk.CTkLabel(header_frame, text="Cargando...")
     summary_label.pack(side="right")
 
+    toolbar_frame = ctk.CTkFrame(container)
+    toolbar_frame.pack(fill="x", pady=(0, 10))
+
+    search_var = tk.StringVar()
+    filter_label = ctk.CTkLabel(toolbar_frame, text="Search:")
+    filter_entry = ctk.CTkEntry(toolbar_frame, textvariable=search_var, width=260)
+    filter_button = ctk.CTkButton(toolbar_frame, text="Filter", width=90)
+    clear_button = ctk.CTkButton(toolbar_frame, text="Clear", width=90)
+    back_button = ctk.CTkButton(toolbar_frame, text="Back", width=90)
+
+    filter_label.pack(side="left", padx=(0, 8))
+    filter_entry.pack(side="left", padx=(0, 8))
+    filter_button.pack(side="left", padx=(0, 8))
+    clear_button.pack(side="left", padx=(0, 8))
+    back_button.pack(side="left")
+
     body_frame = ctk.CTkFrame(container)
     body_frame.pack(fill="both", expand=True)
 
@@ -101,11 +117,17 @@ def run_inventory_gui():
         price_var.set("")
         error_label.configure(text="")
 
-    def refresh_products():
-        products = list_products()
+    filter_var = tk.StringVar()
+
+    def format_product(p):
+        return f"{p.id}: {p.sku} — {p.name} ({p.quantity} @ ${p.price:.2f})"
+
+    def refresh_products(products=None):
+        if products is None:
+            products = list_products()
         listbox.delete(0, tk.END)
         for p in products:
-            listbox.insert(tk.END, f"{p.id}: {p.sku} — {p.name} ({p.quantity} @ ${p.price:.2f})")
+            listbox.insert(tk.END, format_product(p))
 
         summary_label.configure(
             text=f"{len(products)} products · {sum(p.quantity for p in products)} units · ${sum(p.quantity * p.price for p in products):.2f}"
@@ -135,6 +157,31 @@ def run_inventory_gui():
         if price < 0:
             raise ValueError("Price cannot be negative.")
         return sku_var.get().strip(), name_var.get().strip(), description_var.get().strip(), quantity, price
+
+    def apply_filter():
+        query = search_var.get().strip().lower()
+        if not query:
+            refresh_products()
+            return
+        filtered = [
+            p
+            for p in list_products()
+            if query in p.sku.lower()
+            or query in p.name.lower()
+            or query in p.description.lower()
+        ]
+        refresh_products(filtered)
+
+    def clear_filter():
+        search_var.set("")
+        refresh_products()
+
+    def on_back():
+        root.destroy()
+
+    filter_button.configure(command=apply_filter)
+    clear_button.configure(command=clear_filter)
+    back_button.configure(command=on_back)
 
     def on_create():
         try:
