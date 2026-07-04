@@ -1,5 +1,6 @@
 """Simple GUI to interact with the database (create and list users)."""
 import tkinter as tk
+from tkinter import messagebox as tk_messagebox
 import customtkinter as ctk
 
 from .db import init_db, get_session
@@ -110,6 +111,10 @@ def run_gui():
     def delete_user_cmd():
         nonlocal selected_id
         if not selected_id:
+            return
+        # confirmation dialog
+        resp = tk_messagebox.askyesno("Confirm Delete", "Are you sure you want to delete the selected user?")
+        if not resp:
             return
         from .crud import delete_user as _delete_user
 
