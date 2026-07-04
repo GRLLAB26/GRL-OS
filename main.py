@@ -146,12 +146,27 @@ def run_gui():
 		run_cli()
 
 
+def run_inventory_gui():
+	"""Start the inventory dashboard GUI."""
+	try:
+		from app.inventory.gui import run_inventory_gui as _run_inventory_gui
+
+		logger.info("Starting GRL-OS inventory GUI")
+		_run_inventory_gui()
+	except Exception as e:
+		logger.exception("Failed to start inventory GUI: %s", e)
+		raise
+
+
 def main(argv=None):
 	p = argparse.ArgumentParser(description="GRL-OS launcher")
-	p.add_argument("--gui", action="store_true", help="Start GUI instead of CLI")
+	p.add_argument("--gui", action="store_true", help="Start main GUI instead of CLI")
+	p.add_argument("--inventory-gui", action="store_true", help="Start inventory dashboard GUI")
 	args = p.parse_args(argv)
 
-	if args.gui:
+	if args.inventory_gui:
+		run_inventory_gui()
+	elif args.gui:
 		run_gui()
 	else:
 		run_cli()
