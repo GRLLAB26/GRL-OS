@@ -30,6 +30,10 @@ def run_gui():
     name_entry.pack(fill="x", pady=6)
     email_entry.pack(fill="x", pady=6)
 
+    # Inline error label for validation messages
+    error_label = ctk.CTkLabel(form_frame, text="", text_color="#ff3333")
+    error_label.pack(fill="x", pady=(4, 0))
+
 
     list_frame = ctk.CTkFrame(container)
     list_frame.pack(fill="both", expand=True)
@@ -75,6 +79,7 @@ def run_gui():
             if u:
                 name_var.set(u.name)
                 email_var.set(u.email)
+                error_label.configure(text="")
         except Exception:
             selected_id = None
 
@@ -86,12 +91,37 @@ def run_gui():
             return
         # validation
         if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
-            tk_messagebox.showerror("Invalid email", "Please enter a valid email address.")
+            error_label.configure(text="Please enter a valid email address.")
             return
+
+        # optional MX validation using dnspython if available
+        domain = email.split("@", 1)[1]
+        mx_checked = None
+        try:
+            import dns.resolver
+
+            try:
+                answers = dns.resolver.resolve(domain, "MX")
+                mx_checked = len(answers) > 0
+            except Exception:
+                mx_checked = False
+        except Exception:
+            mx_checked = None
+
+        if mx_checked is False:
+            error_label.configure(text="Email domain has no MX records.")
+            return
+        if mx_checked is None:
+            # dnspython not installed or lookup failed; inform but allow creation
+            tk_messagebox.showinfo(
+                "MX check skipped",
+                "MX validation is unavailable (optional dnspython not installed). Proceeding with basic validation.",
+            )
 
         from .crud import create_user as _create_user
         try:
             _create_user(name, email)
+            error_label.configure(text="")
             tk_messagebox.showinfo("Success", "User created successfully.")
         except Exception as e:
             tk_messagebox.showerror("Error", f"Failed to create user: {e}")
@@ -109,11 +139,35 @@ def run_gui():
         if not name or not email:
             return
         if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
-            tk_messagebox.showerror("Invalid email", "Please enter a valid email address.")
+            error_label.configure(text="Please enter a valid email address.")
             return
+
+        domain = email.split("@", 1)[1]
+        mx_checked = None
+        try:
+            import dns.resolver
+
+            try:
+                answers = dns.resolver.resolve(domain, "MX")
+                mx_checked = len(answers) > 0
+            except Exception:
+                mx_checked = False
+        except Exception:
+            mx_checked = None
+
+        if mx_checked is False:
+            error_label.configure(text="Email domain has no MX records.")
+            return
+        if mx_checked is None:
+            tk_messagebox.showinfo(
+                "MX check skipped",
+                "MX validation is unavailable (optional dnspython not installed). Proceeding with basic validation.",
+            )
+
         from .crud import update_user as _update_user
         try:
             _update_user(selected_id, name, email)
+            error_label.configure(text="")
             tk_messagebox.showinfo("Success", "User updated successfully.")
         except Exception as e:
             tk_messagebox.showerror("Error", f"Failed to update user: {e}")
