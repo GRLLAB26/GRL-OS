@@ -6,3 +6,4 @@ pillow
 selenium
 webdriver-manager
 python-dotenv
+dnspython
