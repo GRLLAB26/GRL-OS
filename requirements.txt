@@ -1,0 +1,8 @@
+customtkinter
+sqlalchemy
+pandas
+openpyxl
+pillow
+selenium
+webdriver-manager
+python-dotenv
