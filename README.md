@@ -11,6 +11,11 @@ GRL-OS es el repositorio base para el proyecto GRL. Contiene utilidades, una peq
 - Python 3.11+ (probado con 3.13)
 - Ver `requirements.txt` para las dependencias del proyecto.
 
+Nota: el paquete `dnspython` se incluye en `requirements.txt` y se utiliza para
+comprobar registros MX cuando se valida direcciones de email desde la GUI. Si
+`dnspython` no está disponible, la GUI realizará la validación básica pero
+omitirá la verificación MX.
+
 ## Inicio rápido
 
 1. Crear y activar un entorno virtual:
