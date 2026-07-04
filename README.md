@@ -16,6 +16,12 @@ comprobar registros MX cuando se valida direcciones de email desde la GUI. Si
 `dnspython` no está disponible, la GUI realizará la validación básica pero
 omitirá la verificación MX.
 
+Instalación rápida (si usas el venv del proyecto):
+
+```bash
+.venv/bin/python -m pip install dnspython
+```
+
 ## Inicio rápido
 
 1. Crear y activar un entorno virtual:
