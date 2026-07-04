@@ -49,23 +49,12 @@ def run_cli():
 
 
 def run_gui():
-	"""Attempt to start a tiny CustomTkinter window. Falls back to CLI on failure."""
+	"""Delegate GUI startup to `app.gui.run_gui()`; fallback to CLI on error."""
 	try:
-		import customtkinter as ctk
-
-		ctk.set_appearance_mode("System")
-		app = ctk.CTk()
-		app.geometry("400x120")
-		app.title("GRL-OS")
-
-		label = ctk.CTkLabel(app, text="GRL-OS running (GUI)")
-		label.pack(pady=20)
-
-		btn = ctk.CTkButton(app, text="Quit", command=app.destroy)
-		btn.pack(pady=6)
+		from app.gui import run_gui as _run_gui
 
 		logger.info("Starting GRL-OS (GUI mode)")
-		app.mainloop()
+		_run_gui()
 	except Exception as e:
 		logger.exception("Failed to start GUI - falling back to CLI: %s", e)
 		run_cli()
