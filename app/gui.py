@@ -1,4 +1,5 @@
 """Simple GUI to interact with the database (create and list users)."""
+import re
 import tkinter as tk
 from tkinter import messagebox as tk_messagebox
 import customtkinter as ctk
@@ -83,9 +84,17 @@ def run_gui():
         email = email_var.get().strip()
         if not name or not email:
             return
-        from .crud import create_user as _create_user
+        # validation
+        if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+            tk_messagebox.showerror("Invalid email", "Please enter a valid email address.")
+            return
 
-        _create_user(name, email)
+        from .crud import create_user as _create_user
+        try:
+            _create_user(name, email)
+            tk_messagebox.showinfo("Success", "User created successfully.")
+        except Exception as e:
+            tk_messagebox.showerror("Error", f"Failed to create user: {e}")
         name_var.set("")
         email_var.set("")
         refresh_users()
@@ -99,9 +108,15 @@ def run_gui():
         email = email_var.get().strip()
         if not name or not email:
             return
+        if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+            tk_messagebox.showerror("Invalid email", "Please enter a valid email address.")
+            return
         from .crud import update_user as _update_user
-
-        _update_user(selected_id, name, email)
+        try:
+            _update_user(selected_id, name, email)
+            tk_messagebox.showinfo("Success", "User updated successfully.")
+        except Exception as e:
+            tk_messagebox.showerror("Error", f"Failed to update user: {e}")
         name_var.set("")
         email_var.set("")
         selected_id = None
@@ -117,8 +132,11 @@ def run_gui():
         if not resp:
             return
         from .crud import delete_user as _delete_user
-
-        _delete_user(selected_id)
+        try:
+            _delete_user(selected_id)
+            tk_messagebox.showinfo("Success", "User deleted.")
+        except Exception as e:
+            tk_messagebox.showerror("Error", f"Failed to delete user: {e}")
         selected_id = None
         name_var.set("")
         email_var.set("")
