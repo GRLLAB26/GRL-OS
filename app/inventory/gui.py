@@ -38,16 +38,20 @@ def run_inventory_gui():
     toolbar_frame.pack(fill="x", pady=(0, 10))
 
     search_var = tk.StringVar()
+    low_stock_filter = tk.BooleanVar(value=False)
+
     filter_label = ctk.CTkLabel(toolbar_frame, text="Search:")
-    filter_entry = ctk.CTkEntry(toolbar_frame, textvariable=search_var, width=260)
+    filter_entry = ctk.CTkEntry(toolbar_frame, textvariable=search_var, width=220)
     filter_button = ctk.CTkButton(toolbar_frame, text="Filter", width=90)
     clear_button = ctk.CTkButton(toolbar_frame, text="Clear", width=90)
+    low_stock_button = ctk.CTkButton(toolbar_frame, text="Low stock", width=90)
     back_button = ctk.CTkButton(toolbar_frame, text="Back", width=90)
 
     filter_label.pack(side="left", padx=(0, 8))
     filter_entry.pack(side="left", padx=(0, 8))
     filter_button.pack(side="left", padx=(0, 8))
     clear_button.pack(side="left", padx=(0, 8))
+    low_stock_button.pack(side="left", padx=(0, 8))
     back_button.pack(side="left")
 
     body_frame = ctk.CTkFrame(container)
@@ -131,15 +135,16 @@ def run_inventory_gui():
         return f"{p.id}: {p.sku} — {p.name} ({p.quantity} @ ${p.price:.2f}) [{status}]"
 
     def refresh_products(products=None):
-        if products is None:
-            products = list_products()
+        all_products = list_products() if products is None else products
         listbox.delete(0, tk.END)
-        for p in products:
+        for p in all_products:
             listbox.insert(tk.END, format_product(p))
+            if product_status(p) == "LOW":
+                listbox.itemconfig(tk.END, {'fg': '#ff5555'})
 
-        low_stock = sum(1 for p in products if product_status(p) == "LOW")
+        low_stock = sum(1 for p in all_products if product_status(p) == "LOW")
         summary_label.configure(
-            text=f"{len(products)} products · {sum(p.quantity for p in products)} units · ${sum(p.quantity * p.price for p in products):.2f} · {low_stock} low stock"
+            text=f"{len(all_products)} products · {sum(p.quantity for p in all_products)} units · ${sum(p.quantity * p.price for p in all_products):.2f} · {low_stock} low stock"
         )
 
     def parse_quantity(value: str) -> int:
@@ -169,27 +174,36 @@ def run_inventory_gui():
 
     def apply_filter():
         query = search_var.get().strip().lower()
-        if not query:
-            refresh_products()
-            return
-        filtered = [
-            p
-            for p in list_products()
-            if query in p.sku.lower()
-            or query in p.name.lower()
-            or query in p.description.lower()
-        ]
-        refresh_products(filtered)
+        products = list_products()
+        if query:
+            products = [
+                p
+                for p in products
+                if query in p.sku.lower()
+                or query in p.name.lower()
+                or query in p.description.lower()
+            ]
+        if low_stock_filter.get():
+            products = [p for p in products if product_status(p) == "LOW"]
+        refresh_products(products)
 
     def clear_filter():
         search_var.set("")
+        low_stock_filter.set(False)
+        low_stock_button.configure(text="Low stock")
         refresh_products()
+
+    def toggle_low_stock():
+        low_stock_filter.set(not low_stock_filter.get())
+        low_stock_button.configure(text="All" if low_stock_filter.get() else "Low stock")
+        apply_filter()
 
     def on_back():
         root.destroy()
 
     filter_button.configure(command=apply_filter)
     clear_button.configure(command=clear_filter)
+    low_stock_button.configure(command=toggle_low_stock)
     back_button.configure(command=on_back)
 
     def on_create():
