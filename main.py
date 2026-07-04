@@ -62,6 +62,13 @@ def run_cli():
 	parser_update_prod.add_argument("--quantity", type=int, required=True)
 	parser_update_prod.add_argument("--price", type=float, required=True)
 
+	parser_export = sub.add_parser("export-products", help="Export inventory products to a CSV file")
+	parser_export.add_argument("--file", required=True)
+
+	parser_import = sub.add_parser("import-products", help="Import inventory products from a CSV file")
+	parser_import.add_argument("--file", required=True)
+	parser_import.add_argument("--overwrite", action="store_true", help="Overwrite existing products with matching SKU")
+
 	sub.add_parser("inventory-summary", help="Print a simple inventory dashboard summary")
 
 	args = p.parse_args()
@@ -106,6 +113,16 @@ def run_cli():
 
 		p = _update(args.id, args.sku, args.name, args.description, args.quantity, args.price)
 		print(f"Updated product {p.id}: {p.sku} - {p.name} ({p.quantity} units @ {p.price})")
+	elif args.cmd == "export-products":
+		from app.inventory.product_repository import export_products as _export
+
+		count = _export(args.file)
+		print(f"Exported {count} products to {args.file}")
+	elif args.cmd == "import-products":
+		from app.inventory.product_repository import import_products as _import
+
+		count = _import(args.file, overwrite=args.overwrite)
+		print(f"Imported or updated {count} products from {args.file}")
 	elif args.cmd == "inventory-summary":
 		from app.inventory.dashboard import print_inventory_dashboard
 

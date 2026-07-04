@@ -6,11 +6,12 @@ import customtkinter as ctk
 
 from .db import init_db, get_session
 from .models import User
+from app.dashboard_view import run_dashboard
 
 
 def run_gui():
     init_db()
-
+    run_dashboard()
     ctk.set_appearance_mode("System")
     root = ctk.CTk()
     root.geometry("600x420")
