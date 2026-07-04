@@ -219,11 +219,23 @@ def run_gui():
     update_btn = ctk.CTkButton(btn_frame, text="Update User", command=update_user_cmd)
     delete_btn = ctk.CTkButton(btn_frame, text="Delete User", command=delete_user_cmd)
     refresh_btn = ctk.CTkButton(btn_frame, text="Refresh", command=refresh_users)
+    inventory_btn = ctk.CTkButton(btn_frame, text="Open Inventory", fg_color="#1f6aa5", hover_color="#16629c")
+
     create_btn.pack(side="left", padx=(0, 8))
     update_btn.pack(side="left", padx=(0, 8))
     delete_btn.pack(side="left", padx=(0, 8))
-    refresh_btn.pack(side="left")
+    refresh_btn.pack(side="left", padx=(0, 8))
+    inventory_btn.pack(side="left")
 
+    def open_inventory():
+        try:
+            from .inventory.gui import run_inventory_gui as _run_inventory_gui
+            root.destroy()
+            _run_inventory_gui()
+        except Exception as e:
+            tk_messagebox.showerror("Error", f"Unable to open inventory dashboard: {e}")
+
+    inventory_btn.configure(command=open_inventory)
     listbox.bind("<<ListboxSelect>>", on_select)
 
     refresh_users()
