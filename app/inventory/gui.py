@@ -1,14 +1,16 @@
 """Inventory dashboard GUI for GRL-OS."""
 import re
 import tkinter as tk
-from tkinter import messagebox as tk_messagebox
+from tkinter import filedialog, messagebox as tk_messagebox
 import customtkinter as ctk
 
 from app.db import init_db
 from .product_repository import (
     create_product,
     delete_product,
+    export_products,
     get_product,
+    import_products,
     list_products,
     update_product,
 )
@@ -44,6 +46,8 @@ def run_inventory_gui():
     filter_entry = ctk.CTkEntry(toolbar_frame, textvariable=search_var, width=220)
     filter_button = ctk.CTkButton(toolbar_frame, text="Filter", width=90)
     clear_button = ctk.CTkButton(toolbar_frame, text="Clear", width=90)
+    export_button = ctk.CTkButton(toolbar_frame, text="Export", width=90)
+    import_button = ctk.CTkButton(toolbar_frame, text="Import", width=90)
     low_stock_button = ctk.CTkButton(toolbar_frame, text="Low stock", width=90)
     back_button = ctk.CTkButton(toolbar_frame, text="Back", width=90)
 
@@ -51,6 +55,8 @@ def run_inventory_gui():
     filter_entry.pack(side="left", padx=(0, 8))
     filter_button.pack(side="left", padx=(0, 8))
     clear_button.pack(side="left", padx=(0, 8))
+    export_button.pack(side="left", padx=(0, 8))
+    import_button.pack(side="left", padx=(0, 8))
     low_stock_button.pack(side="left", padx=(0, 8))
     back_button.pack(side="left")
 
@@ -208,8 +214,32 @@ def run_inventory_gui():
     def on_back():
         root.destroy()
 
+    def on_export():
+        file_path = tk.filedialog.asksaveasfilename(
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+            title="Export inventory to CSV",
+        )
+        if not file_path:
+            return
+        count = export_products(file_path)
+        tk_messagebox.showinfo("Export complete", f"Exported {count} products to {file_path}")
+
+    def on_import():
+        file_path = tk.filedialog.askopenfilename(
+            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+            title="Import inventory from CSV",
+        )
+        if not file_path:
+            return
+        count = import_products(file_path, overwrite=True)
+        tk_messagebox.showinfo("Import complete", f"Imported or updated {count} products from {file_path}")
+        refresh_products()
+
     filter_button.configure(command=apply_filter)
     clear_button.configure(command=clear_filter)
+    export_button.configure(command=on_export)
+    import_button.configure(command=on_import)
     low_stock_button.configure(command=toggle_low_stock)
     back_button.configure(command=on_back)
 
