@@ -34,6 +34,21 @@ def run_gui():
     error_label = ctk.CTkLabel(form_frame, text="", text_color="#ff3333")
     error_label.pack(fill="x", pady=(4, 0))
 
+    def is_mx_validation_available() -> bool:
+        try:
+            import dns.resolver  # type: ignore
+            return True
+        except Exception:
+            return False
+
+    mx_validation_enabled = is_mx_validation_available()
+    mx_status_label = ctk.CTkLabel(
+        form_frame,
+        text=f"MX validation: {'enabled' if mx_validation_enabled else 'disabled'}",
+        text_color="#888888",
+        anchor="w",
+    )
+    mx_status_label.pack(fill="x", pady=(4, 10))
 
     list_frame = ctk.CTkFrame(container)
     list_frame.pack(fill="both", expand=True)
