@@ -146,6 +146,11 @@ def run_inventory_gui():
         summary_label.configure(
             text=f"{len(all_products)} products · {sum(p.quantity for p in all_products)} units · ${sum(p.quantity * p.price for p in all_products):.2f} · {low_stock} low stock"
         )
+        reorder_count = len([p for p in all_products if product_status(p) == "LOW"])
+        if reorder_count:
+            summary_label.configure(
+                text=summary_label.cget("text") + f" · {reorder_count} reorder suggestions"
+            )
 
     def parse_quantity(value: str) -> int:
         try:
