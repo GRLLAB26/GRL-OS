@@ -119,8 +119,16 @@ def run_inventory_gui():
 
     filter_var = tk.StringVar()
 
+    def product_status(p):
+        if p.quantity <= 5:
+            return "LOW"
+        if p.quantity <= 20:
+            return "MEDIUM"
+        return "OK"
+
     def format_product(p):
-        return f"{p.id}: {p.sku} — {p.name} ({p.quantity} @ ${p.price:.2f})"
+        status = product_status(p)
+        return f"{p.id}: {p.sku} — {p.name} ({p.quantity} @ ${p.price:.2f}) [{status}]"
 
     def refresh_products(products=None):
         if products is None:
@@ -129,8 +137,9 @@ def run_inventory_gui():
         for p in products:
             listbox.insert(tk.END, format_product(p))
 
+        low_stock = sum(1 for p in products if product_status(p) == "LOW")
         summary_label.configure(
-            text=f"{len(products)} products · {sum(p.quantity for p in products)} units · ${sum(p.quantity * p.price for p in products):.2f}"
+            text=f"{len(products)} products · {sum(p.quantity for p in products)} units · ${sum(p.quantity * p.price for p in products):.2f} · {low_stock} low stock"
         )
 
     def parse_quantity(value: str) -> int:
