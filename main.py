@@ -42,6 +42,28 @@ def run_cli():
 	parser_update.add_argument("--name", required=True)
 	parser_update.add_argument("--email", required=True)
 
+	parser_create_prod = sub.add_parser("create-product", help="Create a new inventory product")
+	parser_create_prod.add_argument("--sku", required=True)
+	parser_create_prod.add_argument("--name", required=True)
+	parser_create_prod.add_argument("--description", required=False, default="")
+	parser_create_prod.add_argument("--quantity", type=int, required=True)
+	parser_create_prod.add_argument("--price", type=float, required=True)
+
+	sub.add_parser("list-products", help="List all inventory products")
+
+	parser_delete_prod = sub.add_parser("delete-product", help="Delete a product by id")
+	parser_delete_prod.add_argument("--id", type=int, required=True)
+
+	parser_update_prod = sub.add_parser("update-product", help="Update a product by id")
+	parser_update_prod.add_argument("--id", type=int, required=True)
+	parser_update_prod.add_argument("--sku", required=True)
+	parser_update_prod.add_argument("--name", required=True)
+	parser_update_prod.add_argument("--description", required=False, default="")
+	parser_update_prod.add_argument("--quantity", type=int, required=True)
+	parser_update_prod.add_argument("--price", type=float, required=True)
+
+	sub.add_parser("inventory-summary", help="Print a simple inventory dashboard summary")
+
 	args = p.parse_args()
 
 	if args.cmd == "create-user":
@@ -64,6 +86,30 @@ def run_cli():
 
 		u = _update(args.id, args.name, args.email)
 		print(f"Updated user {u.id}: {u.name} <{u.email}>")
+	elif args.cmd == "create-product":
+		from app.inventory.product_repository import create_product as _create
+
+		p = _create(args.sku, args.name, args.description, args.quantity, args.price)
+		print(f"Created product {p.id}: {p.sku} - {p.name} ({p.quantity} units @ {p.price})")
+	elif args.cmd == "list-products":
+		from app.inventory.product_repository import list_products as _list
+
+		for p in _list():
+			print(f"{p.id}: {p.sku} - {p.name} ({p.quantity} units @ {p.price})")
+	elif args.cmd == "delete-product":
+		from app.inventory.product_repository import delete_product as _delete
+
+		ok = _delete(args.id)
+		print("Deleted" if ok else "Product not found")
+	elif args.cmd == "update-product":
+		from app.inventory.product_repository import update_product as _update
+
+		p = _update(args.id, args.sku, args.name, args.description, args.quantity, args.price)
+		print(f"Updated product {p.id}: {p.sku} - {p.name} ({p.quantity} units @ {p.price})")
+	elif args.cmd == "inventory-summary":
+		from app.inventory.dashboard import print_inventory_dashboard
+
+		print_inventory_dashboard()
 	else:
 		# Fallback: print environment and versions
 		print("GRL-OS starting (CLI)")
